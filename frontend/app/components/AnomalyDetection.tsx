@@ -1,0 +1,58 @@
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import DataManagement from "./DataManagement";
+import TimeSettings from "./TimeSettings";
+import DataPreprocessing from "./DataPreprocessing";
+import DetectionMethodSettings from "./DetectionMethodSettings";
+
+export default function AnomalyDetection() {
+  return (
+    <div style={{ height: "100%" }}>
+      <PanelGroup direction="horizontal" style={{ height: "100%" }}>
+        <Panel defaultSize={20} minSize={10} maxSize={50}>
+          <div style={{ 
+            height: "100%", 
+            backgroundColor: "#fafafa",
+            borderRight: "1px solid #d9d9d9"
+          }}>
+            <DataManagement />
+          </div>
+        </Panel>
+        <PanelResizeHandle style={{
+          width: "4px",
+          backgroundColor: "#d9d9d9",
+          cursor: "col-resize",
+          transition: "background-color 0.2s",
+        }} />
+        <Panel minSize={50}>
+          <PanelGroup direction="vertical" style={{ height: "100%" }}>
+            <Panel defaultSize={33.33}>
+              <div style={{ height: "100%", borderBottom: "1px solid #f0f0f0" }}>
+                <TimeSettings />
+              </div>
+            </Panel>
+            <PanelResizeHandle style={{
+              height: "2px",
+              backgroundColor: "#f0f0f0",
+              cursor: "row-resize",
+            }} />
+            <Panel defaultSize={33.33}>
+              <div style={{ height: "100%", borderBottom: "1px solid #f0f0f0" }}>
+                <DataPreprocessing />
+              </div>
+            </Panel>
+            <PanelResizeHandle style={{
+              height: "2px",
+              backgroundColor: "#f0f0f0",
+              cursor: "row-resize",
+            }} />
+            <Panel defaultSize={33.34}>
+              <div style={{ height: "100%" }}>
+                <DetectionMethodSettings />
+              </div>
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    </div>
+  );
+}
