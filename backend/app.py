@@ -4,6 +4,10 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # 允许跨域请求
 
+# 注册蓝图
+from routes.data_management import data_bp
+app.register_blueprint(data_bp)
+
 @app.route('/')
 def index():
     return jsonify({

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import DataManagement from "./DataManagement";
 import TimeSettings from "./TimeSettings";
@@ -5,6 +6,8 @@ import DataPreprocessing from "./DataPreprocessing";
 import DetectionMethodSettings from "./DetectionMethodSettings";
 
 export default function AnomalyDetection() {
+  const [selectedFile, setSelectedFile] = useState<string>("");
+
   return (
     <div style={{ height: "100%" }}>
       <PanelGroup direction="horizontal" style={{ height: "100%" }}>
@@ -14,7 +17,7 @@ export default function AnomalyDetection() {
             backgroundColor: "#fafafa",
             borderRight: "1px solid #d9d9d9"
           }}>
-            <DataManagement />
+            <DataManagement onFileSelect={setSelectedFile} />
           </div>
         </Panel>
         <PanelResizeHandle style={{
@@ -27,7 +30,7 @@ export default function AnomalyDetection() {
           <PanelGroup direction="vertical" style={{ height: "100%" }}>
             <Panel defaultSize={33.33}>
               <div style={{ height: "100%", borderBottom: "1px solid #f0f0f0" }}>
-                <TimeSettings />
+                <TimeSettings selectedFile={selectedFile} />
               </div>
             </Panel>
             <PanelResizeHandle style={{
