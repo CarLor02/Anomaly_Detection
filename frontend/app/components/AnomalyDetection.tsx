@@ -8,6 +8,12 @@ import DetectionMethodSettings from "./DetectionMethodSettings";
 export default function AnomalyDetection() {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [verticalRevision, setVerticalRevision] = useState<number>(0);
+  
+  // 检测范围的数据 - 从 TimeSettings 传递过来
+  const [detectionData, setDetectionData] = useState<{
+    timestamps: string[];
+    values: number[];
+  }>({ timestamps: [], values: [] });
 
   const handleVerticalResize = () => {
     setVerticalRevision(prev => prev + 1);
@@ -35,7 +41,11 @@ export default function AnomalyDetection() {
           <PanelGroup direction="vertical" style={{ height: "100%" }}>
             <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
-                <TimeSettings selectedFile={selectedFile} verticalRevision={verticalRevision} />
+                <TimeSettings 
+                  selectedFile={selectedFile} 
+                  verticalRevision={verticalRevision}
+                  onDetectionDataChange={setDetectionData}
+                />
               </div>
             </Panel>
             <PanelResizeHandle style={{
@@ -45,7 +55,11 @@ export default function AnomalyDetection() {
             }} />
             <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
-                <DataPreprocessing verticalRevision={verticalRevision} />
+                <DataPreprocessing 
+                  selectedFile={selectedFile}
+                  verticalRevision={verticalRevision}
+                  detectionData={detectionData}
+                />
               </div>
             </Panel>
             <PanelResizeHandle style={{

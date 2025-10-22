@@ -10,9 +10,10 @@ const { RangePicker } = DatePicker;
 interface TimeSettingsProps {
   selectedFile?: string;
   verticalRevision?: number;
+  onDetectionDataChange?: (data: { timestamps: string[]; values: number[] }) => void;
 }
 
-export default function TimeSettings({ selectedFile, verticalRevision }: TimeSettingsProps) {
+export default function TimeSettings({ selectedFile, verticalRevision, onDetectionDataChange }: TimeSettingsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [timestamps, setTimestamps] = useState<string[]>([]);
   const [values, setValues] = useState<number[]>([]);
@@ -36,6 +37,32 @@ export default function TimeSettings({ selectedFile, verticalRevision }: TimeSet
       setRevision(prev => prev + 1);
     }
   }, [verticalRevision]);
+
+  // 当检测范围变化时，提取检测范围内的数据并传递给父组件
+  useEffect(() => {
+    if (timestamps.length === 0 || !timeRange[0] || !timeRange[1] || !onDetectionDataChange) {
+      return;
+    }
+
+    const detectionStart = timeRange[0].valueOf();
+    const detectionEnd = timeRange[1].valueOf();
+
+    const detectionTimestamps: string[] = [];
+    const detectionValues: number[] = [];
+
+    timestamps.forEach((ts, idx) => {
+      const tsTime = dayjs(ts).valueOf();
+      if (tsTime >= detectionStart && tsTime <= detectionEnd) {
+        detectionTimestamps.push(ts);
+        detectionValues.push(values[idx]);
+      }
+    });
+
+    onDetectionDataChange({
+      timestamps: detectionTimestamps,
+      values: detectionValues,
+    });
+  }, [timestamps, values, timeRange, onDetectionDataChange]);
 
   useEffect(() => {
     if (selectedFile) {
