@@ -3,13 +3,19 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 const { Title } = Typography;
 
-export default function DataPreprocessing() {
+interface DataPreprocessingProps {
+  verticalRevision?: number;
+}
+
+export default function DataPreprocessing({ verticalRevision }: DataPreprocessingProps) {
   return (
     <PanelGroup direction="horizontal" style={{ height: "100%" }}>
       <Panel defaultSize={30} minSize={20} maxSize={50}>
-        <div style={{ height: "100%", padding: "16px", borderRight: "1px solid #f0f0f0" }}>
-          <Title level={5}>数据预处理</Title>
-          <p>预处理参数设置区域</p>
+        <div style={{ height: "100%", padding: "12px", borderRight: "1px solid #f0f0f0", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+          <Title level={5} style={{ margin: "0 0 12px 0", fontSize: "14px" }}>数据预处理</Title>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: "12px" }}>预处理参数设置区域</p>
+          </div>
         </div>
       </Panel>
       <PanelResizeHandle style={{
@@ -18,9 +24,8 @@ export default function DataPreprocessing() {
         cursor: "col-resize",
       }} />
       <Panel minSize={50}>
-        <div style={{ height: "100%", padding: "16px" }}>
-          <Title level={5}>预处理预览</Title>
-          <p>预处理数据图像预览区域</p>
+        <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+          <p style={{ color: "#999", fontSize: "12px" }}>预处理数据图像预览区域</p>
         </div>
       </Panel>
     </PanelGroup>

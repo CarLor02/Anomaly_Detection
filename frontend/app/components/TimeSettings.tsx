@@ -9,13 +9,15 @@ const { RangePicker } = DatePicker;
 
 interface TimeSettingsProps {
   selectedFile?: string;
+  verticalRevision?: number;
 }
 
-export default function TimeSettings({ selectedFile }: TimeSettingsProps) {
+export default function TimeSettings({ selectedFile, verticalRevision }: TimeSettingsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [timestamps, setTimestamps] = useState<string[]>([]);
   const [values, setValues] = useState<number[]>([]);
   const [Plot, setPlot] = useState<any>(null);
+  const [revision, setRevision] = useState<number>(0);
   
   // 时间范围状态
   const [timeRange, setTimeRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
@@ -27,6 +29,13 @@ export default function TimeSettings({ selectedFile }: TimeSettingsProps) {
       setPlot(() => module.default);
     });
   }, []);
+
+  // 当垂直方向拖拽时，更新 revision
+  useEffect(() => {
+    if (verticalRevision !== undefined && verticalRevision > 0) {
+      setRevision(prev => prev + 1);
+    }
+  }, [verticalRevision]);
 
   useEffect(() => {
     if (selectedFile) {
@@ -241,7 +250,7 @@ export default function TimeSettings({ selectedFile }: TimeSettingsProps) {
 
   return (
     <PanelGroup direction="horizontal" style={{ height: "100%" }}>
-      <Panel defaultSize={30} minSize={20} maxSize={50}>
+      <Panel defaultSize={30} minSize={20} maxSize={50} onResize={() => setRevision(prev => prev + 1)}>
         <div style={{ height: "100%", padding: "12px", borderRight: "1px solid #f0f0f0", overflowY: "auto" }}>
           <Title level={5} style={{ margin: "0 0 12px 0", fontSize: "14px" }}>检测时间设置</Title>
           
@@ -293,7 +302,7 @@ export default function TimeSettings({ selectedFile }: TimeSettingsProps) {
         backgroundColor: "#f0f0f0",
         cursor: "col-resize",
       }} />
-      <Panel minSize={50}>
+      <Panel minSize={50} onResize={() => setRevision(prev => prev + 1)}>
         <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
           {loading ? (
             <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -314,6 +323,7 @@ export default function TimeSettings({ selectedFile }: TimeSettingsProps) {
                   },
                   shapes: boundaryShapes,
                 }}
+                revision={revision}
                 style={{ width: "100%", height: "100%" }}
                 config={{ 
                   responsive: true,

@@ -7,6 +7,11 @@ import DetectionMethodSettings from "./DetectionMethodSettings";
 
 export default function AnomalyDetection() {
   const [selectedFile, setSelectedFile] = useState<string>("");
+  const [verticalRevision, setVerticalRevision] = useState<number>(0);
+
+  const handleVerticalResize = () => {
+    setVerticalRevision(prev => prev + 1);
+  };
 
   return (
     <div style={{ height: "100%" }}>
@@ -28,9 +33,9 @@ export default function AnomalyDetection() {
         }} />
         <Panel minSize={50}>
           <PanelGroup direction="vertical" style={{ height: "100%" }}>
-            <Panel defaultSize={33.33}>
-              <div style={{ height: "100%", borderBottom: "1px solid #f0f0f0" }}>
-                <TimeSettings selectedFile={selectedFile} />
+            <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
+              <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
+                <TimeSettings selectedFile={selectedFile} verticalRevision={verticalRevision} />
               </div>
             </Panel>
             <PanelResizeHandle style={{
@@ -38,9 +43,9 @@ export default function AnomalyDetection() {
               backgroundColor: "#f0f0f0",
               cursor: "row-resize",
             }} />
-            <Panel defaultSize={33.33}>
-              <div style={{ height: "100%", borderBottom: "1px solid #f0f0f0" }}>
-                <DataPreprocessing />
+            <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
+              <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
+                <DataPreprocessing verticalRevision={verticalRevision} />
               </div>
             </Panel>
             <PanelResizeHandle style={{
@@ -48,9 +53,9 @@ export default function AnomalyDetection() {
               backgroundColor: "#f0f0f0",
               cursor: "row-resize",
             }} />
-            <Panel defaultSize={33.34}>
-              <div style={{ height: "100%" }}>
-                <DetectionMethodSettings />
+            <Panel defaultSize={33.34} minSize={20} onResize={handleVerticalResize}>
+              <div style={{ height: "100%", width: "100%" }}>
+                <DetectionMethodSettings verticalRevision={verticalRevision} />
               </div>
             </Panel>
           </PanelGroup>
