@@ -153,42 +153,26 @@ class DataSmoothing:
             方法信息字典
         """
         return {
-            'moving_average': {
-                'name': '移动平均',
-                'description': '简单的滑动窗口平均，适用于去除高频噪声',
+            'smooth': {
+                'name': '数据平滑',
+                'description': '对时间序列数据进行平滑处理，减少噪声',
                 'params': {
+                    'method': {
+                        'type': 'select',
+                        'default': 'moving_average',
+                        'options': [
+                            {'label': '移动平均', 'value': 'moving_average'},
+                            {'label': '指数平滑', 'value': 'exponential'},
+                            {'label': '高斯平滑', 'value': 'gaussian'}
+                        ],
+                        'description': '平滑算法'
+                    },
                     'window_size': {
                         'type': 'int',
                         'default': 5,
                         'min': 1,
                         'max': 100,
                         'description': '窗口大小'
-                    }
-                }
-            },
-            'exponential': {
-                'name': '指数平滑',
-                'description': '指数加权移动平均，对近期数据赋予更高权重',
-                'params': {
-                    'window_size': {
-                        'type': 'int',
-                        'default': 5,
-                        'min': 1,
-                        'max': 100,
-                        'description': '窗口大小（影响平滑程度）'
-                    }
-                }
-            },
-            'gaussian': {
-                'name': '高斯平滑',
-                'description': '基于高斯分布的加权平均，提供更平滑的结果',
-                'params': {
-                    'window_size': {
-                        'type': 'int',
-                        'default': 5,
-                        'min': 1,
-                        'max': 100,
-                        'description': '窗口大小（影响平滑范围）'
                     }
                 }
             }

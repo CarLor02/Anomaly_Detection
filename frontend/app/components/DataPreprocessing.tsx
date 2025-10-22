@@ -1,4 +1,4 @@
-import { Typography, Button, Select, InputNumber, Space, message, Empty } from "antd";
+import { Typography, Button, Select, InputNumber, Input, Space, message, Empty } from "antd";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useState, useMemo } from "react";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
@@ -28,12 +28,13 @@ interface SortableItemProps {
   id: string;
   index: number;
   method: PreprocessMethod;
+  displayName: string;
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
 }
 
-function SortableItem({ id, index, method, isSelected, onSelect, onDelete }: SortableItemProps) {
+function SortableItem({ id, index, method, displayName, isSelected, onSelect, onDelete }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -47,15 +48,6 @@ function SortableItem({ id, index, method, isSelected, onSelect, onDelete }: Sor
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  };
-
-  const getMethodDisplayName = (m: PreprocessMethod): string => {
-    const methodNames = {
-      moving_average: '移动平均',
-      exponential: '指数平滑',
-      gaussian: '高斯平滑',
-    };
-    return `数据平滑 (${methodNames[m.params.method]}, 窗口=${m.params.windowSize})`;
   };
 
   return (
@@ -83,7 +75,7 @@ function SortableItem({ id, index, method, isSelected, onSelect, onDelete }: Sor
               步骤 {index + 1}
             </Text>
             <Text style={{ fontSize: "11px", color: "#595959" }}>
-              {getMethodDisplayName(method)}
+              {displayName}
             </Text>
           </div>
           <div style={{ display: "flex", gap: "4px", marginLeft: "8px" }}>
@@ -119,11 +111,25 @@ function SortableItem({ id, index, method, isSelected, onSelect, onDelete }: Sor
 // 预处理方法类型
 type PreprocessMethod = {
   id: string;
-  type: 'smooth';
-  params: {
-    method: 'moving_average' | 'exponential' | 'gaussian';
-    windowSize: number;
-  };
+  type: string;
+  params: Record<string, any>;
+};
+
+// 参数定义
+type ParamDefinition = {
+  type: 'int' | 'float' | 'string' | 'select';
+  default: any;
+  min?: number;
+  max?: number;
+  options?: Array<{ label: string; value: any }>;
+  description: string;
+};
+
+// 方法定义
+type MethodDefinition = {
+  name: string;
+  description: string;
+  params: Record<string, ParamDefinition>;
 };
 
 interface DataPreprocessingProps {
@@ -138,6 +144,9 @@ interface DataPreprocessingProps {
 export default function DataPreprocessing({ selectedFile, verticalRevision, detectionData }: DataPreprocessingProps) {
   const [Plot, setPlot] = useState<any>(null);
   const [revision, setRevision] = useState<number>(0);
+  
+  // 可用的预处理方法定义（从后端获取）
+  const [availableMethods, setAvailableMethods] = useState<Record<string, MethodDefinition>>({});
   
   // 预处理方法流程
   const [methods, setMethods] = useState<PreprocessMethod[]>([]);
@@ -156,14 +165,144 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
   
   // 当前正在编辑的方法（用于新增或修改）
   const [editingMethod, setEditingMethod] = useState<{
-    type: '' | 'smooth';
-    method: 'moving_average' | 'exponential' | 'gaussian';
-    windowSize: number;
+    type: string;
+    params: Record<string, any>;
   }>({
     type: '',
-    method: 'moving_average',
-    windowSize: 5,
+    params: {},
   });
+
+  // 辅助函数：根据类型获取方法定义
+  const getMethodDefinition = (type: string): MethodDefinition | null => {
+    return availableMethods[type] || null;
+  };
+
+  // 辅助函数：生成方法显示名称
+  const getMethodDisplayName = (m: PreprocessMethod): string => {
+    const methodDef = availableMethods[m.type];
+    if (!methodDef) return '未知方法';
+    
+    const typeName = methodDef.name;
+    
+    // 生成参数描述
+    const paramDesc = Object.entries(m.params)
+      .map(([key, value]) => {
+        const paramDef = methodDef.params[key];
+        if (paramDef) {
+          // 如果是 select 类型，显示对应的 label
+          if (paramDef.type === 'select' && paramDef.options) {
+            const option = paramDef.options.find(opt => opt.value === value);
+            return option ? `${paramDef.description}=${option.label}` : `${paramDef.description}=${value}`;
+          }
+          return `${paramDef.description}=${value}`;
+        }
+        return `${key}=${value}`;
+      })
+      .join(', ');
+    
+    return `${typeName} (${paramDesc})`;
+  };
+
+  // 辅助函数：初始化方法的默认参数
+  const getDefaultParams = (type: string): Record<string, any> => {
+    const methodDef = getMethodDefinition(type);
+    if (!methodDef) return {};
+    
+    const params: Record<string, any> = {};
+    Object.entries(methodDef.params).forEach(([key, paramDef]) => {
+      params[key] = paramDef.default;
+    });
+    return params;
+  };
+
+  // 辅助函数：渲染单个参数输入控件
+  const renderParamInput = (paramKey: string, paramDef: ParamDefinition) => {
+    const value = editingMethod.params[paramKey] ?? paramDef.default;
+    
+    const handleChange = (newValue: any) => {
+      setEditingMethod({
+        ...editingMethod,
+        params: {
+          ...editingMethod.params,
+          [paramKey]: newValue,
+        },
+      });
+    };
+
+    switch (paramDef.type) {
+      case 'int':
+        return (
+          <div key={paramKey}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+              {paramDef.description}
+            </Text>
+            <InputNumber
+              value={value}
+              onChange={(v) => handleChange(v || paramDef.default)}
+              min={paramDef.min}
+              max={paramDef.max}
+              size="middle"
+              style={{ width: "100%" }}
+            />
+          </div>
+        );
+      
+      case 'float':
+        return (
+          <div key={paramKey}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+              {paramDef.description}
+            </Text>
+            <InputNumber
+              value={value}
+              onChange={(v) => handleChange(v || paramDef.default)}
+              min={paramDef.min}
+              max={paramDef.max}
+              step={0.1}
+              size="middle"
+              style={{ width: "100%" }}
+            />
+          </div>
+        );
+      
+      case 'select':
+        return (
+          <div key={paramKey}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+              {paramDef.description}
+            </Text>
+            <Select
+              value={value}
+              onChange={handleChange}
+              style={{ width: "100%" }}
+              size="middle"
+            >
+              {paramDef.options?.map(opt => (
+                <Option key={opt.value} value={opt.value}>{opt.label}</Option>
+              ))}
+            </Select>
+          </div>
+        );
+      
+      case 'string':
+        return (
+          <div key={paramKey}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+              {paramDef.description}
+            </Text>
+            <Input
+              value={value}
+              onChange={(e) => handleChange(e.target.value)}
+              size="middle"
+              style={{ width: "100%" }}
+            />
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
 
   // 拖拽传感器
   const sensors = useSensors(
@@ -172,6 +311,28 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // 从后端获取可用的预处理方法配置
+  useEffect(() => {
+    const fetchMethodTypes = async () => {
+      try {
+        const response = await fetch('http://localhost:5555/api/preprocessing/methods');
+        const result = await response.json();
+        
+        if (result.success) {
+          setAvailableMethods(result.data);
+          console.log('已加载预处理方法配置:', result.data);
+        } else {
+          message.error('无法获取预处理方法配置');
+        }
+      } catch (error) {
+        console.error('获取预处理方法配置失败:', error);
+        message.error('无法连接到后端服务');
+      }
+    };
+
+    fetchMethodTypes();
+  }, []);
 
   // 在客户端动态加载 Plotly
   useEffect(() => {
@@ -217,15 +378,13 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
       try {
         setLoading(true);
         
+        // 构建请求体，前端参数直接发送给后端
         const requestBody = {
           timestamps: detectionData.timestamps,
           values: detectionData.values,
           methods: methods.map(m => ({
             type: m.type,
-            params: {
-              method: m.params.method,
-              window_size: m.params.windowSize,
-            }
+            params: m.params
           }))
         };
         
@@ -338,19 +497,15 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
     
     const newMethod: PreprocessMethod = {
       id: Date.now().toString(),
-      type: editingMethod.type as 'smooth',
-      params: {
-        method: editingMethod.method,
-        windowSize: editingMethod.windowSize,
-      },
+      type: editingMethod.type,
+      params: { ...editingMethod.params },
     };
     setMethods([...methods, newMethod]);
     setSelectedMethodIndex(null);
     // 重置为空状态
     setEditingMethod({
       type: '',
-      method: 'moving_average',
-      windowSize: 5,
+      params: {},
     });
     message.success('已添加预处理方法');
   };
@@ -362,12 +517,18 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
     const updatedMethods = [...methods];
     updatedMethods[selectedMethodIndex] = {
       ...updatedMethods[selectedMethodIndex],
-      params: {
-        method: editingMethod.method,
-        windowSize: editingMethod.windowSize,
-      },
+      type: editingMethod.type,
+      params: { ...editingMethod.params },
     };
     setMethods(updatedMethods);
+    
+    // 退出编辑状态
+    setSelectedMethodIndex(null);
+    setEditingMethod({
+      type: '',
+      params: {},
+    });
+    
     message.success('已更新预处理方法');
   };
 
@@ -381,8 +542,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
       setSelectedMethodIndex(null);
       setEditingMethod({
         type: '',
-        method: 'moving_average',
-        windowSize: 5,
+        params: {},
       });
     } else if (selectedMethodIndex !== null && selectedMethodIndex > index) {
       // 如果删除的方法在选中方法之前，更新选中索引
@@ -398,8 +558,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
     const method = methods[index];
     setEditingMethod({
       type: method.type,
-      method: method.params.method,
-      windowSize: method.params.windowSize,
+      params: { ...method.params },
     });
   };
 
@@ -408,8 +567,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
     setSelectedMethodIndex(null);
     setEditingMethod({
       type: '',
-      method: 'moving_average',
-      windowSize: 5,
+      params: {},
     });
   };
 
@@ -461,6 +619,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                             id={method.id}
                             index={index}
                             method={method}
+                            displayName={getMethodDisplayName(method)}
                             isSelected={selectedMethodIndex === index}
                             onSelect={() => handleSelectMethod(index)}
                             onDelete={() => handleDeleteMethod(method.id)}
@@ -483,11 +642,12 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
           {/* 右半部分：方法配置面板 */}
           <div style={{ 
             flex: 1,
+            padding: "12px", 
             display: "flex",
             flexDirection: "column",
             overflow: "hidden"
           }}>
-            <Title level={5} style={{ margin: "0 0 12px 0", fontSize: "14px", flexShrink: 0, padding: "12px 12px 0 12px" }}>
+            <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 12px 0" }}>
               {selectedMethodIndex !== null ? '编辑预处理方法' : '添加预处理方法'}
             </Title>
             
@@ -502,7 +662,6 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                 {/* 1. 方法类型选择 - 20% */}
                 <div style={{ 
                   flex: "0 0 20%", 
-                  padding: "0 16px",
                   borderBottom: "1px solid #f0f0f0"
                 }}>
                   <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
@@ -510,15 +669,22 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                   </Text>
                   <Select
                     value={editingMethod.type || undefined}
-                    onChange={(value) => setEditingMethod({ ...editingMethod, type: value })}
+                    onChange={(value) => {
+                      const params = getDefaultParams(value);
+                      setEditingMethod({
+                        type: value,
+                        params,
+                      });
+                    }}
                     style={{ width: "100%" }}
                     size="middle"
                     showSearch
-                    placeholder="请选择预处理方法"
+                    placeholder="请选择预处理方法类型"
                     allowClear
                   >
-                    <Option value="数据平滑">数据平滑</Option>
-                    {/* 未来添加更多方法 */}
+                    {Object.entries(availableMethods).map(([key, methodDef]) => (
+                      <Option key={key} value={key}>{methodDef.name}</Option>
+                    ))}
                   </Select>
                 </div>
                 
@@ -526,50 +692,25 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                 <div style={{ 
                   flex: "1 1 65%", 
                   overflowY: "auto",
-                  padding: "0 16px",
                   borderBottom: "1px solid #f0f0f0"
                 }}>
-                  {editingMethod.type ? (
-                    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                      <div>
-                        <Text strong style={{ fontSize: "13px", display: "block", color: "#262626" }}>
-                          方法参数
-                        </Text>
-                      </div>
-                      
-                      {/* 平滑算法选择 */}
-                      <div>
-                        <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
-                          平滑算法
-                        </Text>
-                        <Select
-                          value={editingMethod.method}
-                          onChange={(value) => setEditingMethod({ ...editingMethod, method: value })}
-                          style={{ width: "100%" }}
-                          size="middle"
-                        >
-                          <Option value="moving_average">移动平均</Option>
-                          <Option value="exponential">指数平滑</Option>
-                          <Option value="gaussian">高斯平滑</Option>
-                        </Select>
-                      </div>
-                      
-                      {/* 窗口大小 */}
-                      <div>
-                        <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
-                          窗口大小
-                        </Text>
-                        <InputNumber
-                          value={editingMethod.windowSize}
-                          onChange={(value) => setEditingMethod({ ...editingMethod, windowSize: value || 5 })}
-                          min={1}
-                          max={100}
-                          size="middle"
-                          style={{ width: "100%" }}
-                        />
-                      </div>
-                    </Space>
-                  ) : (
+                  {editingMethod.type ? (() => {
+                    const methodDef = getMethodDefinition(editingMethod.type);
+                    if (!methodDef) return <Empty description="方法配置加载失败" />;
+                    
+                    return (
+                      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                        <div style={{ marginTop: "8px" }}>
+                          <Text strong style={{ fontSize: "13px", display: "block", marginBottom: "12px", color: "#262626" }}>
+                            方法参数
+                          </Text>
+                        </div>
+                        {Object.entries(methodDef.params).map(([key, paramDef]) => 
+                          renderParamInput(key, paramDef)
+                        )}
+                      </Space>
+                    );
+                  })() : (
                     <Empty 
                       description="请先选择方法类型" 
                       style={{ marginTop: "40px" }}
@@ -581,7 +722,6 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                 {/* 3. 添加/更新按钮 - 15% */}
                 <div style={{ 
                   flex: "0 0 15%", 
-                  padding: "0 16px",
                   display: "flex",
                   alignItems: "center"
                 }}>

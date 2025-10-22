@@ -190,19 +190,27 @@ def get_methods():
         "success": true,
         "data": {
             "smooth": {
-                "moving_average": {...},
-                "exponential": {...},
-                "gaussian": {...}
+                "name": "数据平滑",
+                "description": "...",
+                "params": {
+                    "method": {
+                        "type": "select",
+                        "options": [...]
+                    },
+                    "window_size": {...}
+                }
             }
         }
     }
     """
     try:
+        methods_dict = DataSmoothing.get_method_info()
+        # 未来可以添加更多预处理方法类型
+        # methods_dict.update(Detrending.get_method_info())
+        
         return jsonify({
             'success': True,
-            'data': {
-                'smooth': DataSmoothing.get_method_info()
-            }
+            'data': methods_dict
         })
     except Exception as e:
         print(f"Error in get_methods: {str(e)}")
