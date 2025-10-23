@@ -4,6 +4,7 @@
 
 from flask import Blueprint, request, jsonify
 from detection.three_sigma import ThreeSigmaDetection
+from detection.iqr import IQRDetection
 from utils.data_cleaner import validate_data, get_data_quality_info
 
 detection_bp = Blueprint('detection', __name__, url_prefix='/api/detection')
@@ -30,6 +31,8 @@ def get_methods():
     """
     try:
         methods_dict = ThreeSigmaDetection.get_method_info()
+        # 添加 IQR 方法
+        methods_dict.update(IQRDetection.get_method_info())
         # 未来可以添加更多检测方法
         # methods_dict.update(IsolationForest.get_method_info())
         
@@ -123,6 +126,9 @@ def detect_anomalies():
         if method_type == '3sigma':
             sigma_threshold = params.get('sigma_threshold', 3.0)
             anomalies, stats = ThreeSigmaDetection.detect(values, sigma_threshold)
+        elif method_type == 'iqr':
+            iqr_multiplier = params.get('iqr_multiplier', 1.5)
+            anomalies, stats = IQRDetection.detect(values, iqr_multiplier)
         else:
             return jsonify({
                 'success': False,
