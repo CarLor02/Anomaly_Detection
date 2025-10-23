@@ -612,11 +612,15 @@ export default function DataPreprocessing({
             {selectedFile && detectionData && detectionData.timestamps.length > 0 ? (
               <>
                 {methods.length === 0 ? (
-                  <Empty
-                    description={<Text style={{ fontSize: "12px", color: "#999" }}>暂无预处理方法</Text>}
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    style={{ marginTop: "24px" }}
-                  />
+                  <div style={{ 
+                    flex: 1, 
+                    display: "flex", 
+                    justifyContent: "center", 
+                    alignItems: "center", 
+                    height: "100%" 
+                  }}>
+                    <p style={{ color: "#999" }}>暂无预处理方法</p>
+                  </div>
                 ) : (
                   <DndContext
                     sensors={sensors}
@@ -724,11 +728,15 @@ export default function DataPreprocessing({
                       </Space>
                     );
                   })() : (
-                    <Empty 
-                      description="请先选择方法类型" 
-                      style={{ marginTop: "40px" }}
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
+                    <div style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      alignItems: "center", 
+                      height: "100%" 
+                    }}>
+                      <p style={{ color: "#999" }}>请先选择方法类型</p>
+                    </div>
                   )}
                 </div>
                 
