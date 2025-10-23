@@ -89,31 +89,21 @@ export default function TimeSettings({ selectedFile, verticalRevision, onDetecti
   const fetchFileData = async (filePath: string) => {
     try {
       setLoading(true);
-      console.log("Fetching file data for:", filePath);
       
       const response = await fetch(
         `http://localhost:5555/api/data/read-file?path=${encodeURIComponent(filePath)}`
       );
       
-      console.log("Response status:", response.status);
       const result = await response.json();
-      console.log("Response data:", result);
 
       if (result.success) {
-        console.log("Data loaded successfully:", {
-          timestamps: result.data.timestamps.length,
-          values: result.data.values.length,
-          fileType: result.data.file_type
-        });
         setTimestamps(result.data.timestamps);
         setValues(result.data.values);
         message.success(`成功加载 ${result.data.total_points} 个数据点`);
       } else {
-        console.error("Failed to load data:", result.message);
         message.error(result.message || "读取文件失败");
       }
     } catch (error) {
-      console.error("Error fetching file data:", error);
       message.error("无法加载文件数据");
     } finally {
       setLoading(false);
@@ -336,8 +326,10 @@ export default function TimeSettings({ selectedFile, verticalRevision, onDetecti
       <Panel minSize={50} onResize={() => setRevision(prev => prev + 1)}>
         <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}>
           {loading ? (
-            <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <Spin tip="加载数据中..." />
+            <div style={{ flex: 1 }}>
+              <Spin tip="加载数据中..." spinning={true}>
+                <div style={{ minHeight: "200px" }} />
+              </Spin>
             </div>
           ) : timestamps.length > 0 && Plot ? (
             <div style={{ flex: 1, width: "100%", height: "100%" }}>

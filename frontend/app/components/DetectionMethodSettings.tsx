@@ -74,15 +74,6 @@ export default function DetectionMethodSettings({
     }
   }, [selectedFile]);
 
-  // 添加调试日志
-  useEffect(() => {
-    console.log('=== DetectionMethodSettings 状态 ===');
-    console.log('selectedFile:', selectedFile);
-    console.log('detectionData:', detectionData);
-    console.log('detectionData?.timestamps.length:', detectionData?.timestamps.length);
-    console.log('availableMethods:', Object.keys(availableMethods));
-  }, [selectedFile, detectionData, availableMethods]);
-
   useEffect(() => {
     const fetchMethods = async () => {
       try {
@@ -91,12 +82,10 @@ export default function DetectionMethodSettings({
         
         if (result.success) {
           setAvailableMethods(result.data);
-          console.log('已加载检测方法配置:', result.data);
         } else {
           message.error('无法获取检测方法配置');
         }
       } catch (error) {
-        console.error('获取检测方法配置失败:', error);
         message.error('无法连接到后端服务');
       }
     };
@@ -212,7 +201,6 @@ export default function DetectionMethodSettings({
         message.error(result.message || '检测失败');
       }
     } catch (error) {
-      console.error('检测请求失败:', error);
       message.error('无法连接到后端服务');
     } finally {
       setLoading(false);

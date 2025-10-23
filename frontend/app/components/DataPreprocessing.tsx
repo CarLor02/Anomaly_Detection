@@ -327,12 +327,10 @@ export default function DataPreprocessing({
         
         if (result.success) {
           setAvailableMethods(result.data);
-          console.log('已加载预处理方法配置:', result.data);
         } else {
           message.error('无法获取预处理方法配置');
         }
       } catch (error) {
-        console.error('获取预处理方法配置失败:', error);
         message.error('无法连接到后端服务');
       }
     };
@@ -372,18 +370,12 @@ export default function DataPreprocessing({
   // 当检测数据或方法变化时，调用后端 API 应用预处理
   useEffect(() => {
     const applyPreprocessing = async () => {
-      console.log('=== 预处理 Effect 触发 ===');
-      console.log('detectionData:', detectionData ? `${detectionData.timestamps.length} points` : 'null');
-      console.log('methods:', methods.length);
-      
       if (!detectionData || detectionData.timestamps.length === 0) {
-        console.log('无检测数据，清空处理数据');
         setProcessedData({ timestamps: [], values: [] });
         return;
       }
 
       if (methods.length === 0) {
-        console.log('无预处理方法，使用原始数据');
         setProcessedData(detectionData);
         return;
       }
@@ -403,13 +395,6 @@ export default function DataPreprocessing({
           }))
         };
         
-        console.log('发送预处理请求:', {
-          timestamps_count: requestBody.timestamps.length,
-          values_count: requestBody.values.length,
-          methods_count: requestBody.methods.length,
-          methods: requestBody.methods
-        });
-        
         const response = await fetch('http://localhost:5555/api/preprocessing/apply-pipeline', {
           method: 'POST',
           headers: {
@@ -420,19 +405,13 @@ export default function DataPreprocessing({
 
         const result = await response.json();
         
-        console.log('预处理API响应:', result);
-        console.log('原始数据长度:', detectionData.values.length);
-        console.log('处理后数据长度:', result.data?.values?.length);
-        
         if (result.success) {
           setProcessedData(result.data);
-          console.log('已设置处理后的数据:', result.data);
         } else {
           message.error(result.message || '预处理失败');
           setProcessedData(detectionData);
         }
       } catch (error) {
-        console.error('预处理请求失败:', error);
         message.error('无法连接到后端服务');
         setProcessedData(detectionData);
       } finally {
@@ -446,8 +425,6 @@ export default function DataPreprocessing({
   // 绘图数据 - 显示原始数据和处理后的数据
   const plotData = useMemo(() => {
     const traces = [];
-
-    console.log('生成绘图数据 - detectionData:', detectionData?.values?.length, 'processedData:', processedData?.values?.length, 'methods:', methods.length, 'loading:', loading);
 
     // 原始数据（灰色）
     if (detectionData && detectionData.timestamps.length > 0) {
@@ -464,7 +441,6 @@ export default function DataPreprocessing({
 
     // 处理后的数据（蓝色）- 只有在不加载中且有有效数据时才显示
     if (!loading && processedData.timestamps.length > 0 && methods.length > 0) {
-      console.log('添加处理后数据到图表:', processedData.values.slice(0, 5));
       traces.push({
         x: processedData.timestamps,
         y: processedData.values,
@@ -476,7 +452,6 @@ export default function DataPreprocessing({
       });
     }
 
-    console.log('生成的traces数量:', traces.length);
     return traces;
   }, [detectionData, processedData, methods, loading]);
 

@@ -51,7 +51,6 @@ export default function DataManagement({ onFileSelect }: DataManagementProps) {
   };
 
   const onSelect = (selectedKeysValue: React.Key[], info: any) => {
-    console.log("Selected:", selectedKeysValue, info);
     
     // 如果点击的是文件夹，切换展开状态
     if (info.node.type === 'folder') {
@@ -159,8 +158,10 @@ export default function DataManagement({ onFileSelect }: DataManagementProps) {
       <Title level={4}>数据管理</Title>
       
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
-          <Spin tip="加载文件列表..." />
+        <div style={{ flex: 1 }}>
+          <Spin tip="加载文件列表..." spinning={true}>
+            <div style={{ minHeight: "200px" }} />
+          </Spin>
         </div>
       ) : (
         <div style={{ flex: 1, overflow: "auto" }}>
