@@ -5,6 +5,12 @@
 
 import numpy as np
 from typing import List, Dict, Any
+import sys
+import os
+
+# 添加项目根目录到路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.data_cleaner import clean_data
 
 
 class DataSmoothing:
@@ -23,8 +29,11 @@ class DataSmoothing:
         """
         应用平滑方法
         
+        注意：数据验证应在调用此方法前完成（在routes层）
+        此方法会自动清洗数据中的NaN和Inf值（使用插值填充）
+        
         Args:
-            values: 输入数据值列表
+            values: 输入数据值列表（应已通过验证）
             method: 平滑方法 ('moving_average', 'exponential', 'gaussian')
             window_size: 窗口大小
             
@@ -40,21 +49,19 @@ class DataSmoothing:
         if method not in DataSmoothing.SUPPORTED_METHODS:
             raise ValueError(f"不支持的平滑方法: {method}. 支持的方法: {DataSmoothing.SUPPORTED_METHODS}")
         
-        # 转换为 numpy 数组以提高计算效率
+        # 使用统一的数据清洗模块（数据验证已在routes层完成）
+        valid_data, valid_mask, valid_indices = clean_data(values)
+        
+        # 如果没有有效数据，返回原数据（理论上不应该发生，因为routes层已验证）
+        if len(valid_data) == 0:
+            return values
+        
+        # 转换为 numpy 数组
         data = np.array(values, dtype=float)
         
-        # 检查并处理 NaN 和 Inf 值
-        if np.any(np.isnan(data)) or np.any(np.isinf(data)):
-            print(f"警告: 输入数据包含 NaN 或 Inf 值")
-            # 将 NaN 和 Inf 替换为相邻有效值的平均值
-            mask = np.isnan(data) | np.isinf(data)
-            if np.all(mask):
-                # 如果全是无效值，返回全零
-                return [0.0] * len(values)
-            # 使用线性插值填充无效值
-            valid_indices = np.where(~mask)[0]
-            if len(valid_indices) > 0:
-                data[mask] = np.interp(np.where(mask)[0], valid_indices, data[valid_indices])
+        # 使用线性插值填充无效值
+        if len(valid_data) < len(values):
+            data[~valid_mask] = np.interp(np.where(~valid_mask)[0], valid_indices, valid_data)
         
         if method == 'moving_average':
             result = DataSmoothing._moving_average(data, window_size)

@@ -139,9 +139,15 @@ interface DataPreprocessingProps {
     timestamps: string[];
     values: number[];
   };
+  onProcessedDataChange?: (data: { timestamps: string[]; values: number[] }) => void;
 }
 
-export default function DataPreprocessing({ selectedFile, verticalRevision, detectionData }: DataPreprocessingProps) {
+export default function DataPreprocessing({ 
+  selectedFile, 
+  verticalRevision, 
+  detectionData,
+  onProcessedDataChange 
+}: DataPreprocessingProps) {
   const [Plot, setPlot] = useState<any>(null);
   const [revision, setRevision] = useState<number>(0);
   
@@ -356,6 +362,13 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
     }
   }, [selectedFile]);
 
+  // 当 processedData 变化时，通知父组件
+  useEffect(() => {
+    if (onProcessedDataChange) {
+      onProcessedDataChange(processedData);
+    }
+  }, [processedData, onProcessedDataChange]);
+
   // 当检测数据或方法变化时，调用后端 API 应用预处理
   useEffect(() => {
     const applyPreprocessing = async () => {
@@ -377,6 +390,8 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
 
       try {
         setLoading(true);
+        // 立即清空旧的处理数据，避免在加载新数据时显示旧数据
+        setProcessedData({ timestamps: [], values: [] });
         
         // 构建请求体，前端参数直接发送给后端
         const requestBody = {
@@ -432,7 +447,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
   const plotData = useMemo(() => {
     const traces = [];
 
-    console.log('生成绘图数据 - detectionData:', detectionData?.values?.length, 'processedData:', processedData?.values?.length, 'methods:', methods.length);
+    console.log('生成绘图数据 - detectionData:', detectionData?.values?.length, 'processedData:', processedData?.values?.length, 'methods:', methods.length, 'loading:', loading);
 
     // 原始数据（灰色）
     if (detectionData && detectionData.timestamps.length > 0) {
@@ -447,8 +462,8 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
       });
     }
 
-    // 处理后的数据（蓝色）
-    if (processedData.timestamps.length > 0 && methods.length > 0) {
+    // 处理后的数据（蓝色）- 只有在不加载中且有有效数据时才显示
+    if (!loading && processedData.timestamps.length > 0 && methods.length > 0) {
       console.log('添加处理后数据到图表:', processedData.values.slice(0, 5));
       traces.push({
         x: processedData.timestamps,
@@ -463,7 +478,7 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
 
     console.log('生成的traces数量:', traces.length);
     return traces;
-  }, [detectionData, processedData, methods]);
+  }, [detectionData, processedData, methods, loading]);
 
   // 处理拖拽结束
   const handleDragEnd = (event: DragEndEvent) => {
@@ -631,11 +646,9 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                 )}
               </>
             ) : (
-              <Empty
-                description={<Text style={{ fontSize: "12px", color: "#999" }}>请先选择数据文件</Text>}
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                style={{ marginTop: "24px" }}
-              />
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <p style={{ color: "#999" }}>请先选择数据文件</p>
+              </div>
             )}
           </div>
 
@@ -699,9 +712,9 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                     if (!methodDef) return <Empty description="方法配置加载失败" />;
                     
                     return (
-                      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                      <Space direction="vertical" size="small" style={{ width: "100%" }}>
                         <div style={{ marginTop: "8px" }}>
-                          <Text strong style={{ fontSize: "13px", display: "block", marginBottom: "12px", color: "#262626" }}>
+                          <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
                             方法参数
                           </Text>
                         </div>
@@ -756,10 +769,9 @@ export default function DataPreprocessing({ selectedFile, verticalRevision, dete
                 </div>
               </div>
             ) : (
-              <Empty
-                description={<Text style={{ fontSize: "12px", color: "#999" }}>请先选择数据文件</Text>}
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <p style={{ color: "#999" }}>请先选择数据文件</p>
+              </div>
             )}
           </div>
         </div>

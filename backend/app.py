@@ -7,9 +7,11 @@ CORS(app)  # 允许跨域请求
 # 注册蓝图
 from routes.data_management import data_bp
 from routes.preprocessing import preprocessing_bp
+from routes.detection import detection_bp
 
 app.register_blueprint(data_bp)
 app.register_blueprint(preprocessing_bp)
+app.register_blueprint(detection_bp)
 
 @app.route('/')
 def index():

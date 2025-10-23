@@ -4,6 +4,7 @@
 
 from flask import Blueprint, request, jsonify
 from preprocessing.smoothing import DataSmoothing
+from utils.data_cleaner import validate_data, get_data_quality_info
 
 preprocessing_bp = Blueprint('preprocessing', __name__, url_prefix='/api/preprocessing')
 
@@ -50,7 +51,22 @@ def apply_smoothing():
                 'message': 'timestamps 和 values 长度不一致'
             }), 400
         
-        # 应用平滑
+        # 统一的数据验证和质量检查
+        is_valid, error_message = validate_data(values)
+        if not is_valid:
+            return jsonify({
+                'success': False,
+                'message': f'数据验证失败: {error_message}'
+            }), 400
+        
+        # 获取数据质量信息（用于日志）
+        quality_info = get_data_quality_info(values)
+        if quality_info['invalid_points'] > 0:
+            print(f"警告: 数据包含 {quality_info['invalid_points']} 个无效值 "
+                  f"(NaN: {quality_info['nan_count']}, Inf: {quality_info['inf_count']}), "
+                  f"将在预处理过程中使用插值处理")
+        
+        # 应用平滑（smoothing.py会使用data_cleaner进行数据清洗）
         smoothed_values = DataSmoothing.apply(values, method, window_size)
         
         # 验证结果
@@ -136,6 +152,21 @@ def apply_pipeline():
                 'success': False,
                 'message': 'timestamps 和 values 长度不一致'
             }), 400
+        
+        # 统一的数据验证和质量检查
+        is_valid, error_message = validate_data(values)
+        if not is_valid:
+            return jsonify({
+                'success': False,
+                'message': f'数据验证失败: {error_message}'
+            }), 400
+        
+        # 获取数据质量信息（用于日志）
+        quality_info = get_data_quality_info(values)
+        if quality_info['invalid_points'] > 0:
+            print(f"警告: 数据包含 {quality_info['invalid_points']} 个无效值 "
+                  f"(NaN: {quality_info['nan_count']}, Inf: {quality_info['inf_count']}), "
+                  f"将在预处理过程中使用插值处理")
         
         # 依次应用每个预处理方法
         processed_values = values

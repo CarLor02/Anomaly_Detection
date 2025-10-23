@@ -1,10 +1,10 @@
-import { Typography, Spin, message, Slider, DatePicker, Space } from "antd";
+import { Typography, Spin, message, Slider, DatePicker, Space, Empty } from "antd";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useState, useMemo } from "react";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 interface TimeSettingsProps {
@@ -278,49 +278,53 @@ export default function TimeSettings({ selectedFile, verticalRevision, onDetecti
   return (
     <PanelGroup direction="horizontal" style={{ height: "100%" }}>
       <Panel defaultSize={30} minSize={20} maxSize={50} onResize={() => setRevision(prev => prev + 1)}>
-        <div style={{ height: "100%", padding: "12px", borderRight: "1px solid #f0f0f0", overflowY: "auto" }}>
+        <div style={{ height: "100%", padding: "12px", borderRight: "1px solid #f0f0f0", overflowY: "auto", display: "flex", flexDirection: "column" }}>
           <Title level={5} style={{ margin: "0 0 12px 0", fontSize: "14px" }}>检测时间设置</Title>
           
-          {selectedFile && (
-            <div style={{ marginBottom: "12px", fontSize: "11px", color: "#999" }}>
-              <div style={{ wordBreak: "break-all", lineHeight: "1.4" }}>{selectedFile}</div>
-            </div>
-          )}
-          
-          {timestamps.length > 0 && (
-            <Space direction="vertical" style={{ width: "100%" }} size="small">
-              <div>
-                <div style={{ marginBottom: "6px", fontSize: "12px", fontWeight: 500 }}>数据范围</div>
-                <div style={{ fontSize: "11px", color: "#666", lineHeight: "1.8" }}>
-                  <div style={{ display: "flex" }}>
-                    <span style={{ flex: 1 }}>起始: {timestamps[0]}</span>
-                    <span style={{ flex: 1 }}>终止: {timestamps[timestamps.length - 1]}</span>
+          {selectedFile && timestamps.length > 0 ? (
+            <>
+              <div style={{ marginBottom: "12px", fontSize: "11px", color: "#999" }}>
+                <div style={{ wordBreak: "break-all", lineHeight: "1.4" }}>{selectedFile}</div>
+              </div>
+              
+              <Space direction="vertical" style={{ width: "100%" }} size="small">
+                <div>
+                  <div style={{ marginBottom: "6px", fontSize: "12px", fontWeight: 500 }}>数据范围</div>
+                  <div style={{ fontSize: "11px", color: "#666", lineHeight: "1.8" }}>
+                    <div style={{ display: "flex" }}>
+                      <span style={{ flex: 1 }}>起始: {timestamps[0]}</span>
+                      <span style={{ flex: 1 }}>终止: {timestamps[timestamps.length - 1]}</span>
+                    </div>
+                    <div style={{ marginTop: "2px" }}>共 {timestamps.length} 个数据点</div>
                   </div>
-                  <div style={{ marginTop: "2px" }}>共 {timestamps.length} 个数据点</div>
                 </div>
-              </div>
 
-              <div style={{ marginTop: "8px" }}>
-                <div style={{ marginBottom: "6px", fontSize: "12px", fontWeight: 500 }}>检测范围</div>
-                <RangePicker
-                  showTime
-                  value={timeRange}
-                  onChange={handleDateChange}
-                  style={{ width: "100%" }}
-                  size="small"
-                  format="YYYY-MM-DD HH:mm"
-                />
-              </div>
+                <div style={{ marginTop: "8px" }}>
+                  <div style={{ marginBottom: "6px", fontSize: "12px", fontWeight: 500 }}>检测范围</div>
+                  <RangePicker
+                    showTime
+                    value={timeRange}
+                    onChange={handleDateChange}
+                    style={{ width: "100%" }}
+                    size="small"
+                    format="YYYY-MM-DD HH:mm"
+                  />
+                </div>
 
-              <div style={{ marginTop: "8px" }}>
-                <Slider
-                  range
-                  value={sliderRange}
-                  onChange={handleSliderChange}
-                  tooltip={{ open: false }}
-                />
-              </div>
-            </Space>
+                <div style={{ marginTop: "8px" }}>
+                  <Slider
+                    range
+                    value={sliderRange}
+                    onChange={handleSliderChange}
+                    tooltip={{ open: false }}
+                  />
+                </div>
+              </Space>
+            </>
+          ) : (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <p style={{ color: "#999" }}>请先选择数据文件</p>
+            </div>
           )}
         </div>
       </Panel>

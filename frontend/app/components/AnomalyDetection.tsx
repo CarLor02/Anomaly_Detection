@@ -15,6 +15,12 @@ export default function AnomalyDetection() {
     values: number[];
   }>({ timestamps: [], values: [] });
 
+  // 预处理后的数据 - 从 DataPreprocessing 传递过来
+  const [processedData, setProcessedData] = useState<{
+    timestamps: string[];
+    values: number[];
+  }>({ timestamps: [], values: [] });
+
   const handleVerticalResize = () => {
     setVerticalRevision(prev => prev + 1);
   };
@@ -59,6 +65,7 @@ export default function AnomalyDetection() {
                   selectedFile={selectedFile}
                   verticalRevision={verticalRevision}
                   detectionData={detectionData}
+                  onProcessedDataChange={setProcessedData}
                 />
               </div>
             </Panel>
@@ -69,7 +76,11 @@ export default function AnomalyDetection() {
             }} />
             <Panel defaultSize={33.34} minSize={20} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%" }}>
-                <DetectionMethodSettings verticalRevision={verticalRevision} />
+                <DetectionMethodSettings 
+                  selectedFile={selectedFile}
+                  verticalRevision={verticalRevision}
+                  detectionData={processedData.timestamps.length > 0 ? processedData : detectionData}
+                />
               </div>
             </Panel>
           </PanelGroup>
