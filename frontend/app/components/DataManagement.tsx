@@ -180,7 +180,7 @@ export default function DataManagement({ onFileSelect }: DataManagementProps) {
               }}
             />
           ) : (
-            <p style={{ color: "#999" }}>暂无数据文件</p>
+            <p style={{ color: "#ffffffff" }}>暂无数据文件</p>
           )}
         </div>
       )}

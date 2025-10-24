@@ -70,9 +70,10 @@ export default function DetectionMethodSettings({
   }, [verticalRevision]);
 
   useEffect(() => {
+    // 当文件变化时（包括切换到另一个文件），清空检测结果
+    setDetectionResult(null);
     if (!selectedFile) {
       setSelectedMethod({ type: '', params: {} });
-      setDetectionResult(null);
     }
   }, [selectedFile]);
 
