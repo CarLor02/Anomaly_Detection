@@ -172,6 +172,7 @@ class LOFDetection:
         return {
             'lof': {
                 'name': 'LOF 检测',
+                'category': '距离型',
                 'description': '局部离群因子算法，通过比较点与邻域的密度来识别异常。能够识别不同密度区域中的局部异常，是最经典的密度异常检测方法之一。',
                 'principle': '计算每个点的局部可达密度(LRD)，再计算局部离群因子(LOF)，即该点LRD与其邻居LRD的比值。LOF>1表示该点比邻域稀疏（异常），值越大越异常。',
                 'params': {

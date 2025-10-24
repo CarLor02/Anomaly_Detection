@@ -136,6 +136,7 @@ class KNNDetection:
         return {
             'knn': {
                 'name': 'KNN 检测',
+                'category': '距离型',
                 'description': '基于K近邻的局部异常检测方法。通过计算每个点到其K个最近邻的平均距离来度量异常性，距离大的点被视为异常。',
                 'principle': '对每个数据点，找到其K个最近邻，计算到这些邻居的平均距离。距离最大的contamination比例的点被标记为异常。适合检测局部稀疏区域的异常点。',
                 'params': {

@@ -98,6 +98,7 @@ class ThreeSigmaDetection:
         return {
             '3sigma': {
                 'name': '3-Sigma 检测',
+                'category': '统计型',
                 'description': '基于正态分布假设的经典统计方法。计算数据的均值(μ)和标准差(σ)，将偏离均值超过 N×σ 的数据点标记为异常。适用于近似正态分布的数据。',
                 'principle': '假设数据服从正态分布，根据3σ原则，99.7%的数据应落在[μ-3σ, μ+3σ]区间内，超出此区间的数据点被视为异常。',
                 'params': {

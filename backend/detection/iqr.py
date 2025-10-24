@@ -106,6 +106,7 @@ class IQRDetection:
         return {
             'iqr': {
                 'name': 'IQR 检测',
+                'category': '统计型',
                 'description': '基于四分位距的稳健统计方法，不受极端值影响。通过计算数据的四分位数来确定异常边界，适用于非正态分布的数据。',
                 'principle': '计算第一四分位数(Q1)、第三四分位数(Q3)和四分位距(IQR=Q3-Q1)，将超出[Q1-k×IQR, Q3+k×IQR]范围的点标记为异常。箱线图的经典方法。',
                 'params': {

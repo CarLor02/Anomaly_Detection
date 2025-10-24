@@ -19,6 +19,7 @@ type ParamDefinition = {
 
 type MethodDefinition = {
   name: string;
+  category?: string;  // 方法类型：统计型 or 距离型
   description: string;
   principle?: string;  // 检测原理
   params: Record<string, ParamDefinition>;
@@ -41,6 +42,7 @@ export default function DetectionMethodSettings({
   const [PlotlyComponent, setPlotlyComponent] = useState<any>(null);
   const [revision, setRevision] = useState<number>(0);
   const [availableMethods, setAvailableMethods] = useState<Record<string, MethodDefinition>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedMethod, setSelectedMethod] = useState<{
     type: string;
     params: Record<string, any>;
@@ -73,6 +75,7 @@ export default function DetectionMethodSettings({
     // 当文件变化时（包括切换到另一个文件），清空检测结果
     setDetectionResult(null);
     if (!selectedFile) {
+      setSelectedCategory('');
       setSelectedMethod({ type: '', params: {} });
     }
   }, [selectedFile]);
@@ -252,30 +255,63 @@ export default function DetectionMethodSettings({
                 {/* 1. 方法类型选择 - 20% */}
                 <div style={{ 
                   flex: "0 0 20%", 
-                  borderBottom: "1px solid #f0f0f0"
                 }}>
                   <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
-                    方法类型
+                    方法选择
                   </Text>
-                <Select
-                  value={selectedMethod.type || undefined}
-                  onChange={(value) => {
-                    setSelectedMethod({
-                      type: value,
-                      params: getDefaultParams(value)
-                    });
-                    setDetectionResult(null);
-                  }}
-                  placeholder="请选择检测方法"
-                  style={{ width: "100%" }}
-                  size="middle"
-                  showSearch
-                  allowClear
-                >
-                  {Object.entries(availableMethods).map(([key, method]) => (
-                    <Option key={key} value={key}>{method.name}</Option>
-                  ))}
-                </Select>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {/* 方法类型选择器 */}
+                    <div style={{ flex: 1 }}>
+                      <Text style={{ fontSize: "11px", color: "#666", display: "block", marginBottom: "4px" }}>
+                        方法类型
+                      </Text>
+                      <Select
+                        value={selectedCategory || undefined}
+                        onChange={(value) => {
+                          setSelectedCategory(value);
+                          // 清空当前选中的方法
+                          setSelectedMethod({ type: '', params: {} });
+                          setDetectionResult(null);
+                        }}
+                        placeholder="选择方法类型"
+                        style={{ width: "100%" }}
+                        size="middle"
+                        allowClear
+                      >
+                        <Option value="统计型">统计型</Option>
+                        <Option value="距离型">距离型</Option>
+                      </Select>
+                    </div>
+                    
+                    {/* 具体方法选择器 */}
+                    <div style={{ flex: 1 }}>
+                      <Text style={{ fontSize: "11px", color: "#666", display: "block", marginBottom: "4px" }}>
+                        具体方法
+                      </Text>
+                      <Select
+                        value={selectedMethod.type || undefined}
+                        onChange={(value) => {
+                          setSelectedMethod({
+                            type: value,
+                            params: getDefaultParams(value)
+                          });
+                          setDetectionResult(null);
+                        }}
+                        placeholder="选择检测方法"
+                        style={{ width: "100%" }}
+                        size="middle"
+                        showSearch
+                        allowClear
+                        disabled={!selectedCategory}
+                      >
+                        {Object.entries(availableMethods)
+                          .filter(([_, method]) => method.category === selectedCategory)
+                          .map(([key, method]) => (
+                            <Option key={key} value={key}>{method.name}</Option>
+                          ))}
+                      </Select>
+                    </div>
+                  </div>
               </div>
 
               {/* 2. 方法参数设置 - 中间可滚动区域 65% */}

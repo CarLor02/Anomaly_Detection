@@ -177,6 +177,7 @@ class KMeansDetection:
         return {
             'kmeans': {
                 'name': 'K-Means 检测',
+                'category': '距离型',
                 'description': '基于聚类的异常检测方法。先将数据聚为K个簇，然后识别距离簇中心较远的点为异常。适用于数据呈现明显聚类结构的场景。',
                 'principle': '使用K-Means算法将数据分为K个簇，计算每个点到最近簇中心的距离。距离最大的contamination比例的点被标记为异常，表示它们偏离正常模式。',
                 'params': {
