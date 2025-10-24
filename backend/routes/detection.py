@@ -8,6 +8,9 @@ from detection.iqr import IQRDetection
 from detection.knn import KNNDetection
 from detection.lof import LOFDetection
 from detection.kmeans import KMeansDetection
+from detection.matrix_profile import MatrixProfileDetection
+from detection.dbscan import DBSCANDetection
+from detection.norma import NormADetection
 from utils.data_cleaner import validate_data, get_data_quality_info
 
 detection_bp = Blueprint('detection', __name__, url_prefix='/api/detection')
@@ -42,6 +45,12 @@ def get_methods():
         methods_dict.update(LOFDetection.get_method_info())
         # 添加 K-Means 方法
         methods_dict.update(KMeansDetection.get_method_info())
+        # 添加 Matrix Profile 方法
+        methods_dict.update(MatrixProfileDetection.get_method_info())
+        # 添加 DBSCAN 方法
+        methods_dict.update(DBSCANDetection.get_method_info())
+        # 添加 NormA 方法
+        methods_dict.update(NormADetection.get_method_info())
         
         return jsonify({
             'success': True,
@@ -149,6 +158,19 @@ def detect_anomalies():
             contamination = params.get('contamination', 0.1)
             max_iter = params.get('max_iter', 100)
             anomalies, stats = KMeansDetection.detect(values, n_clusters, contamination, max_iter)
+        elif method_type == 'matrix_profile':
+            window_size = params.get('window_size', 10)
+            contamination = params.get('contamination', 0.1)
+            anomalies, stats = MatrixProfileDetection.detect(values, window_size, contamination)
+        elif method_type == 'dbscan':
+            eps = params.get('eps', 0.5)
+            min_samples = params.get('min_samples', 5)
+            anomalies, stats = DBSCANDetection.detect(values, eps, min_samples)
+        elif method_type == 'norma':
+            window_size = params.get('window_size', 10)
+            contamination = params.get('contamination', 0.1)
+            sensitivity = params.get('sensitivity', 1.0)
+            anomalies, stats = NormADetection.detect(values, window_size, contamination, sensitivity)
         else:
             return jsonify({
                 'success': False,
