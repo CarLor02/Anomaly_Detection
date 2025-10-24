@@ -45,7 +45,7 @@ export default function AnomalyDetection() {
         }} />
         <Panel minSize={50}>
           <PanelGroup direction="vertical" style={{ height: "100%" }}>
-            <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
+            <Panel defaultSize={20} minSize={15} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
                 <TimeSettings 
                   selectedFile={selectedFile} 
@@ -59,7 +59,7 @@ export default function AnomalyDetection() {
               backgroundColor: "#f0f0f0",
               cursor: "row-resize",
             }} />
-            <Panel defaultSize={33.33} minSize={20} onResize={handleVerticalResize}>
+            <Panel defaultSize={40} minSize={20} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%", borderBottom: "1px solid #f0f0f0" }}>
                 <DataPreprocessing 
                   selectedFile={selectedFile}
@@ -74,7 +74,7 @@ export default function AnomalyDetection() {
               backgroundColor: "#f0f0f0",
               cursor: "row-resize",
             }} />
-            <Panel defaultSize={33.34} minSize={20} onResize={handleVerticalResize}>
+            <Panel defaultSize={40} minSize={20} onResize={handleVerticalResize}>
               <div style={{ height: "100%", width: "100%" }}>
                 <DetectionMethodSettings 
                   selectedFile={selectedFile}

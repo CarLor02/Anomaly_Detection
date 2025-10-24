@@ -162,7 +162,8 @@ class DataSmoothing:
         return {
             'smooth': {
                 'name': '数据平滑',
-                'description': '对时间序列数据进行平滑处理，减少噪声',
+                'description': '对时间序列数据进行平滑处理，减少噪声，提升数据质量',
+                'principle': '通过不同的权重策略对时间窗口内的数据点进行加权平均，消除短期波动，保留长期趋势。移动平均使用等权重，指数平滑赋予近期数据更高权重，高斯平滑使用正态分布权重。',
                 'params': {
                     'method': {
                         'type': 'select',
@@ -172,14 +173,16 @@ class DataSmoothing:
                             {'label': '指数平滑', 'value': 'exponential'},
                             {'label': '高斯平滑', 'value': 'gaussian'}
                         ],
-                        'description': '平滑算法'
+                        'description': '平滑算法',
+                        'detail': '移动平均（MA）：简单平均，适合平稳数据；指数平滑（EMA）：近期权重更高，适合趋势数据；高斯平滑：使用正态分布权重，平滑效果最好但计算较慢。'
                     },
                     'window_size': {
                         'type': 'int',
                         'default': 5,
                         'min': 1,
                         'max': 100,
-                        'description': '窗口大小'
+                        'description': '窗口大小',
+                        'detail': '平滑窗口的数据点数量。值越大平滑效果越强，但会损失更多细节。建议：噪声大用7-15，噪声小用3-7。指数平滑中，窗口大小影响衰减速度（alpha=2/(window+1））。'
                     }
                 }
             }

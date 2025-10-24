@@ -284,8 +284,8 @@ export default function TimeSettings({ selectedFile, verticalRevision, onDetecti
                     <div style={{ display: "flex" }}>
                       <span style={{ flex: 1 }}>起始: {timestamps[0]}</span>
                       <span style={{ flex: 1 }}>终止: {timestamps[timestamps.length - 1]}</span>
+                      <span style={{ flex: 1 }}>共 {timestamps.length} 个数据点</span>
                     </div>
-                    <div style={{ marginTop: "2px" }}>共 {timestamps.length} 个数据点</div>
                   </div>
                 </div>
 

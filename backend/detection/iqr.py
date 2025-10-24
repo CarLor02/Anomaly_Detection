@@ -106,7 +106,8 @@ class IQRDetection:
         return {
             'iqr': {
                 'name': 'IQR 检测',
-                'description': '基于四分位距（IQR）识别异常值。数据点超出 [Q1 - k×IQR, Q3 + k×IQR] 范围即被标记为异常。常用倍数：1.5（离群值）或 3.0（极端离群值）',
+                'description': '基于四分位距的稳健统计方法，不受极端值影响。通过计算数据的四分位数来确定异常边界，适用于非正态分布的数据。',
+                'principle': '计算第一四分位数(Q1)、第三四分位数(Q3)和四分位距(IQR=Q3-Q1)，将超出[Q1-k×IQR, Q3+k×IQR]范围的点标记为异常。箱线图的经典方法。',
                 'params': {
                     'iqr_multiplier': {
                         'type': 'float',
@@ -114,7 +115,8 @@ class IQRDetection:
                         'min': 0.5,
                         'max': 5.0,
                         'step': 0.1,
-                        'description': 'IQR 倍数'
+                        'description': 'IQR 倍数',
+                        'detail': 'IQR的倍数系数。1.5为标准值（识别离群值），3.0识别极端离群值。值越大检测越保守。'
                     }
                 }
             }

@@ -98,7 +98,8 @@ class ThreeSigmaDetection:
         return {
             '3sigma': {
                 'name': '3-Sigma 检测',
-                'description': '基于正态分布假设，检测偏离均值超过 N 倍标准差的异常点',
+                'description': '基于正态分布假设的经典统计方法。计算数据的均值(μ)和标准差(σ)，将偏离均值超过 N×σ 的数据点标记为异常。适用于近似正态分布的数据。',
+                'principle': '假设数据服从正态分布，根据3σ原则，99.7%的数据应落在[μ-3σ, μ+3σ]区间内，超出此区间的数据点被视为异常。',
                 'params': {
                     'sigma_threshold': {
                         'type': 'float',
@@ -106,7 +107,8 @@ class ThreeSigmaDetection:
                         'min': 1.0,
                         'max': 5.0,
                         'step': 0.1,
-                        'description': 'Sigma 阈值（倍数）'
+                        'description': 'Sigma 阈值（倍数）',
+                        'detail': '设置偏离均值的标准差倍数。3σ对应99.7%置信度，2σ对应95.4%，值越大检测越保守。'
                     }
                 }
             }

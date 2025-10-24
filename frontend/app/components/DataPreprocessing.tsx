@@ -123,12 +123,14 @@ type ParamDefinition = {
   max?: number;
   options?: Array<{ label: string; value: any }>;
   description: string;
+  detail?: string;  // 参数详细说明
 };
 
 // 方法定义
 type MethodDefinition = {
   name: string;
   description: string;
+  principle?: string;  // 方法原理说明
   params: Record<string, ParamDefinition>;
 };
 
@@ -239,9 +241,14 @@ export default function DataPreprocessing({
       case 'int':
         return (
           <div key={paramKey}>
-            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>
               {paramDef.description}
             </Text>
+            {paramDef.detail && (
+              <Text style={{ fontSize: "10px", color: "#999", display: "block", marginBottom: "6px", lineHeight: "1.4" }}>
+                {paramDef.detail}
+              </Text>
+            )}
             <InputNumber
               value={value}
               onChange={(v) => handleChange(v || paramDef.default)}
@@ -256,9 +263,14 @@ export default function DataPreprocessing({
       case 'float':
         return (
           <div key={paramKey}>
-            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>
               {paramDef.description}
             </Text>
+            {paramDef.detail && (
+              <Text style={{ fontSize: "10px", color: "#999", display: "block", marginBottom: "6px", lineHeight: "1.4" }}>
+                {paramDef.detail}
+              </Text>
+            )}
             <InputNumber
               value={value}
               onChange={(v) => handleChange(v || paramDef.default)}
@@ -274,9 +286,14 @@ export default function DataPreprocessing({
       case 'select':
         return (
           <div key={paramKey}>
-            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>
               {paramDef.description}
             </Text>
+            {paramDef.detail && (
+              <Text style={{ fontSize: "10px", color: "#999", display: "block", marginBottom: "6px", lineHeight: "1.4" }}>
+                {paramDef.detail}
+              </Text>
+            )}
             <Select
               value={value}
               onChange={handleChange}
@@ -563,7 +580,7 @@ export default function DataPreprocessing({
 
   return (
     <PanelGroup direction="horizontal" style={{ height: "100%" }}>
-      {/* 左侧：预处理流程列表（可拖拽）+ 方法配置（左右分栏） */}
+      {/* 左侧：添加预处理方法配置 + 预处理流程列表（左右分栏） */}
       <Panel defaultSize={30} minSize={25} maxSize={40}>
         <div style={{ 
           height: "100%", 
@@ -571,73 +588,14 @@ export default function DataPreprocessing({
           flexDirection: "row",
           borderRight: "1px solid #f0f0f0",
         }}>
-          {/* 左半部分：预处理流程列表 */}
-          <div style={{ 
-            flex: 1,
-            padding: "12px", 
-            overflowY: "auto", 
-            display: "flex", 
-            flexDirection: "column",
-            borderRight: "1px solid #f0f0f0",
-          }}>
-            <div style={{ marginBottom: "12px" }}>
-              <Title level={5} style={{ margin: 0, fontSize: "14px" }}>预处理流程</Title>
-            </div>
-            
-            {selectedFile && detectionData && detectionData.timestamps.length > 0 ? (
-              <>
-                {methods.length === 0 ? (
-                  <div style={{ 
-                    flex: 1, 
-                    display: "flex", 
-                    justifyContent: "center", 
-                    alignItems: "center", 
-                    height: "100%" 
-                  }}>
-                    <p style={{ color: "#999" }}>暂无预处理方法</p>
-                  </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={methods.map(m => m.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div style={{ flex: 1, overflowY: "auto" }}>
-                        {methods.map((method, index) => (
-                          <SortableItem
-                            key={method.id}
-                            id={method.id}
-                            index={index}
-                            method={method}
-                            displayName={getMethodDisplayName(method)}
-                            isSelected={selectedMethodIndex === index}
-                            onSelect={() => handleSelectMethod(index)}
-                            onDelete={() => handleDeleteMethod(method.id)}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                )}
-              </>
-            ) : (
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <p style={{ color: "#999" }}>请先选择数据文件</p>
-              </div>
-            )}
-          </div>
-
-          {/* 右半部分：方法配置面板 */}
+          {/* 左半部分：方法配置面板 */}
           <div style={{ 
             flex: 1,
             padding: "12px", 
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden"
+            overflow: "hidden",
+            borderRight: "1px solid #f0f0f0",
           }}>
             <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 12px 0" }}>
               {selectedMethodIndex !== null ? '编辑预处理方法' : '添加预处理方法'}
@@ -691,16 +649,17 @@ export default function DataPreprocessing({
                     if (!methodDef) return <Empty description="方法配置加载失败" />;
                     
                     return (
-                      <Space direction="vertical" size="small" style={{ width: "100%" }}>
-                        <div style={{ marginTop: "8px" }}>
-                          <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
-                            方法参数
-                          </Text>
+                      <div style={{ width: "100%", marginTop: "8px" }}>
+                        {/* 参数设置 */}
+                        <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+                          方法参数
+                        </Text>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {Object.entries(methodDef.params).map(([key, paramDef]) => 
+                            renderParamInput(key, paramDef)
+                          )}
                         </div>
-                        {Object.entries(methodDef.params).map(([key, paramDef]) => 
-                          renderParamInput(key, paramDef)
-                        )}
-                      </Space>
+                      </div>
                     );
                   })() : (
                     <div style={{ 
@@ -748,6 +707,138 @@ export default function DataPreprocessing({
                         添加方法
                       </Button>
                     )
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <p style={{ color: "#999" }}>请先选择数据文件</p>
+              </div>
+            )}
+          </div>
+
+          {/* 右半部分：方法简介 + 预处理流程列表 */}
+          <div style={{ 
+            flex: 1,
+            padding: "12px", 
+            display: "flex", 
+            flexDirection: "column",
+            overflow: "hidden"
+          }}>
+            {selectedFile && detectionData && detectionData.timestamps.length > 0 ? (
+              <div style={{ 
+                flex: 1, 
+                display: "flex", 
+                flexDirection: "column", 
+                overflow: "hidden"
+              }}>
+                {/* 上栏：方法简介 - 35% */}
+                <div style={{ 
+                  flex: "0 0 35%",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden"
+                }}>
+                  <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 8px 0" }}>
+                    方法简介
+                  </Title>
+                  {editingMethod.type && getMethodDefinition(editingMethod.type) ? (
+                    <div style={{ 
+                      flex: 1,
+                      overflowY: "auto",
+                      padding: "8px",
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: "4px",
+                      borderLeft: "3px solid #52c41a"
+                    }}>
+                      <Text style={{ fontSize: "11px", color: "#666", display: "block", marginBottom: "4px" }}>
+                        <strong>方法简介：</strong>
+                      </Text>
+                      <Text style={{ fontSize: "11px", color: "#333", lineHeight: "1.5", display: "block" }}>
+                        {getMethodDefinition(editingMethod.type)!.description}
+                      </Text>
+                      {getMethodDefinition(editingMethod.type)!.principle && (
+                        <>
+                          <Text style={{ fontSize: "11px", color: "#666", display: "block", marginTop: "8px", marginBottom: "4px" }}>
+                            <strong>处理原理：</strong>
+                          </Text>
+                          <Text style={{ fontSize: "11px", color: "#333", lineHeight: "1.5", display: "block" }}>
+                            {getMethodDefinition(editingMethod.type)!.principle}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      alignItems: "center",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "4px",
+                      border: "1px solid #f0f0f0"
+                    }}>
+                      <p style={{ color: "#999" }}>未选中方法</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 分隔符 */}
+                <div style={{
+                  height: "2px",
+                  backgroundColor: "#f0f0f0",
+                  margin: "12px 0",
+                  flexShrink: 0
+                }} />
+
+                {/* 下栏：预处理流程列表 */}
+                <div style={{ 
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden"
+                }}>
+                  <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 8px 0" }}>
+                    预处理流程
+                  </Title>
+                  {methods.length === 0 ? (
+                    <div style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      alignItems: "center",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "4px",
+                      border: "1px solid #f0f0f0"
+                    }}>
+                      <p style={{ color: "#999" }}>暂无预处理方法</p>
+                    </div>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={methods.map(m => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div style={{ flex: 1, overflowY: "auto" }}>
+                          {methods.map((method, index) => (
+                            <SortableItem
+                              key={method.id}
+                              id={method.id}
+                              index={index}
+                              method={method}
+                              displayName={getMethodDisplayName(method)}
+                              isSelected={selectedMethodIndex === index}
+                              onSelect={() => handleSelectMethod(index)}
+                              onDelete={() => handleDeleteMethod(method.id)}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
                   )}
                 </div>
               </div>

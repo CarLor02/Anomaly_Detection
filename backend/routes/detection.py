@@ -5,6 +5,9 @@
 from flask import Blueprint, request, jsonify
 from detection.three_sigma import ThreeSigmaDetection
 from detection.iqr import IQRDetection
+from detection.knn import KNNDetection
+from detection.lof import LOFDetection
+from detection.kmeans import KMeansDetection
 from utils.data_cleaner import validate_data, get_data_quality_info
 
 detection_bp = Blueprint('detection', __name__, url_prefix='/api/detection')
@@ -33,8 +36,12 @@ def get_methods():
         methods_dict = ThreeSigmaDetection.get_method_info()
         # 添加 IQR 方法
         methods_dict.update(IQRDetection.get_method_info())
-        # 未来可以添加更多检测方法
-        # methods_dict.update(IsolationForest.get_method_info())
+        # 添加 KNN 方法
+        methods_dict.update(KNNDetection.get_method_info())
+        # 添加 LOF 方法
+        methods_dict.update(LOFDetection.get_method_info())
+        # 添加 K-Means 方法
+        methods_dict.update(KMeansDetection.get_method_info())
         
         return jsonify({
             'success': True,
@@ -129,6 +136,19 @@ def detect_anomalies():
         elif method_type == 'iqr':
             iqr_multiplier = params.get('iqr_multiplier', 1.5)
             anomalies, stats = IQRDetection.detect(values, iqr_multiplier)
+        elif method_type == 'knn':
+            n_neighbors = params.get('n_neighbors', 5)
+            contamination = params.get('contamination', 0.1)
+            anomalies, stats = KNNDetection.detect(values, n_neighbors, contamination)
+        elif method_type == 'lof':
+            n_neighbors = params.get('n_neighbors', 20)
+            contamination = params.get('contamination', 0.1)
+            anomalies, stats = LOFDetection.detect(values, n_neighbors, contamination)
+        elif method_type == 'kmeans':
+            n_clusters = params.get('n_clusters', 3)
+            contamination = params.get('contamination', 0.1)
+            max_iter = params.get('max_iter', 100)
+            anomalies, stats = KMeansDetection.detect(values, n_clusters, contamination, max_iter)
         else:
             return jsonify({
                 'success': False,

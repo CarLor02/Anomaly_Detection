@@ -14,11 +14,13 @@ type ParamDefinition = {
   step?: number;
   options?: Array<{ label: string; value: any }>;
   description: string;
+  detail?: string;  // 参数详细说明
 };
 
 type MethodDefinition = {
   name: string;
   description: string;
+  principle?: string;  // 检测原理
   params: Record<string, ParamDefinition>;
 };
 
@@ -125,9 +127,14 @@ export default function DetectionMethodSettings({
       case 'float':
         return (
           <div key={paramKey}>
-            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>
               {paramDef.description}
             </Text>
+            {paramDef.detail && (
+              <Text style={{ fontSize: "10px", color: "#999", display: "block", marginBottom: "6px", lineHeight: "1.4" }}>
+                {paramDef.detail}
+              </Text>
+            )}
             <InputNumber
               value={value}
               onChange={(v) => handleChange(v || paramDef.default)}
@@ -143,9 +150,14 @@ export default function DetectionMethodSettings({
       case 'select':
         return (
           <div key={paramKey}>
-            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
+            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>
               {paramDef.description}
             </Text>
+            {paramDef.detail && (
+              <Text style={{ fontSize: "10px", color: "#999", display: "block", marginBottom: "6px", lineHeight: "1.4" }}>
+                {paramDef.detail}
+              </Text>
+            )}
             <Select
               value={value}
               onChange={handleChange}
@@ -273,8 +285,9 @@ export default function DetectionMethodSettings({
               }}>
                 {selectedMethod.type && getMethodDefinition(selectedMethod.type) ? (
                   <div style={{ width: "100%", marginTop: "8px" }}>
+                    {/* 参数设置 */}
                     <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px" }}>
-                      方法参数
+                      参数设置
                     </Text>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       {Object.entries(getMethodDefinition(selectedMethod.type)!.params).map(([key, paramDef]) => 
@@ -329,71 +342,148 @@ export default function DetectionMethodSettings({
             flexDirection: "column",
             overflow: "hidden"
           }}>
-            <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 12px 0" }}>
-              检测结果统计
-            </Title>
-            
             {selectedFile && detectionData && detectionData.timestamps.length > 0 ? (
-              detectionResult && detectionResult.stats ? (
+              <div style={{ 
+                flex: 1, 
+                display: "flex", 
+                flexDirection: "column", 
+                overflow: "hidden"
+              }}>
+                {/* 上栏：方法简介 - 35% */}
                 <div style={{ 
-                  padding: "12px",
-                  backgroundColor: "#fafafa",
-                  borderRadius: "4px",
-                  border: "1px solid #f0f0f0",
+                  flex: "0 0 35%",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "12px",
-                  fontSize: "12px"
+                  overflow: "hidden"
                 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "#666" }}>检测数据点数:</span>
-                    <span style={{ fontWeight: 500 }}>{detectionResult.stats.total_points}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "#666" }}>有效数据点数:</span>
-                    <span style={{ fontWeight: 500 }}>{detectionResult.stats.valid_points}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", color: "#ff4d4f" }}>
-                    <span>异常数据点数:</span>
-                    <span style={{ fontWeight: 600 }}>{detectionResult.stats.anomaly_count}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", color: "#ff4d4f" }}>
-                    <span>异常比例:</span>
-                    <span style={{ fontWeight: 600 }}>{(detectionResult.stats.anomaly_ratio * 100).toFixed(2)}%</span>
-                  </div>
-                  {detectionResult.anomaly_indices.length > 0 && (
-                    <>
-                      <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "4px", paddingTop: "8px" }}>
-                        <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px", color: "#ff4d4f" }}>
-                          第一个异常点
-                        </Text>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ color: "#666" }}>时间:</span>
-                        <span style={{ fontWeight: 500, fontSize: "11px", wordBreak: "break-all" }}>
-                          {detectionResult.timestamps[detectionResult.anomaly_indices[0]]}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ color: "#666" }}>数值:</span>
-                        <span style={{ fontWeight: 500 }}>
-                          {detectionResult.values[detectionResult.anomaly_indices[0]].toFixed(2)}
-                        </span>
-                      </div>
-                    </>
+                  <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 8px 0" }}>
+                    方法简介
+                  </Title>
+                  {selectedMethod.type && getMethodDefinition(selectedMethod.type) ? (
+                    <div style={{ 
+                      flex: 1,
+                      overflowY: "auto",
+                      padding: "12px",
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: "4px",
+                      borderLeft: "3px solid #1890ff"
+                    }}>
+                      <Text style={{ fontSize: "11px", color: "#666", display: "block", marginBottom: "4px" }}>
+                        <strong>方法简介：</strong>
+                      </Text>
+                      <Text style={{ fontSize: "11px", color: "#333", lineHeight: "1.5", display: "block" }}>
+                        {getMethodDefinition(selectedMethod.type)!.description}
+                      </Text>
+                      {getMethodDefinition(selectedMethod.type)!.principle && (
+                        <>
+                          <Text style={{ fontSize: "11px", color: "#666", display: "block", marginTop: "8px", marginBottom: "4px" }}>
+                            <strong>检测原理：</strong>
+                          </Text>
+                          <Text style={{ fontSize: "11px", color: "#333", lineHeight: "1.5", display: "block" }}>
+                            {getMethodDefinition(selectedMethod.type)!.principle}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      alignItems: "center",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "4px",
+                      border: "1px solid #f0f0f0"
+                    }}>
+                      <p style={{ color: "#999" }}>未选中方法</p>
+                    </div>
                   )}
                 </div>
-              ) : (
+
+                {/* 分隔符 */}
+                <div style={{
+                  height: "2px",
+                  backgroundColor: "#f0f0f0",
+                  margin: "12px 0",
+                  flexShrink: 0
+                }} />
+
+                {/* 下栏：检测结果统计 */}
                 <div style={{ 
-                  flex: 1, 
-                  display: "flex", 
-                  justifyContent: "center", 
-                  alignItems: "center", 
-                  height: "100%" 
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden"
                 }}>
-                  <p style={{ color: "#999" }}>点击"应用方法"查看结果</p>
+                  <Title level={5} style={{ margin: 0, fontSize: "14px", flexShrink: 0, padding: "0 0 8px 0" }}>
+                    检测结果统计
+                  </Title>
+                  {detectionResult && detectionResult.stats ? (
+                    <div style={{ 
+                      flex: 1,
+                      overflowY: "auto",
+                      padding: "12px",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "4px",
+                      border: "1px solid #f0f0f0",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                      fontSize: "12px"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#666" }}>检测数据点数:</span>
+                        <span style={{ fontWeight: 500 }}>{detectionResult.stats.total_points}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "#666" }}>有效数据点数:</span>
+                        <span style={{ fontWeight: 500 }}>{detectionResult.stats.valid_points}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", color: "#ff4d4f" }}>
+                        <span>异常数据点数:</span>
+                        <span style={{ fontWeight: 600 }}>{detectionResult.stats.anomaly_count}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", color: "#ff4d4f" }}>
+                        <span>异常比例:</span>
+                        <span style={{ fontWeight: 600 }}>{(detectionResult.stats.anomaly_ratio * 100).toFixed(2)}%</span>
+                      </div>
+                      {detectionResult.anomaly_indices.length > 0 && (
+                        <>
+                          <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "4px", paddingTop: "8px" }}>
+                            <Text strong style={{ fontSize: "12px", display: "block", marginBottom: "8px", color: "#ff4d4f" }}>
+                              第一个异常点
+                            </Text>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span style={{ color: "#666" }}>时间:</span>
+                            <span style={{ fontWeight: 500, fontSize: "11px", wordBreak: "break-all" }}>
+                              {detectionResult.timestamps[detectionResult.anomaly_indices[0]]}
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span style={{ color: "#666" }}>数值:</span>
+                            <span style={{ fontWeight: 500 }}>
+                              {detectionResult.values[detectionResult.anomaly_indices[0]].toFixed(2)}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ 
+                      flex: 1, 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      alignItems: "center",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "4px",
+                      border: "1px solid #f0f0f0"
+                    }}>
+                      <p style={{ color: "#999" }}>点击"应用方法"查看结果</p>
+                    </div>
+                  )}
                 </div>
-              )
+              </div>
             ) : (
               <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <p style={{ color: "#999" }}>请先选择数据文件</p>
