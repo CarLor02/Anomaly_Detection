@@ -179,8 +179,6 @@ class LOFDetection:
                     'n_neighbors': {
                         'type': 'int',
                         'default': 20,
-                        'min': 5,
-                        'max': 50,
                         'step': 1,
                         'description': '邻居数量',
                         'detail': '用于计算局部密度的邻居数量。建议设置较大值（20-30）以获得稳定结果。值太小会导致结果不稳定。'
@@ -188,8 +186,6 @@ class LOFDetection:
                     'contamination': {
                         'type': 'float',
                         'default': 0.1,
-                        'min': 0.01,
-                        'max': 0.5,
                         'step': 0.01,
                         'description': '异常数据比例',
                         'detail': '预期的异常点占总数据的比例。用于确定LOF阈值，LOF最大的contamination比例的点被标记为异常。'

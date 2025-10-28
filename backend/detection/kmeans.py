@@ -184,8 +184,6 @@ class KMeansDetection:
                     'n_clusters': {
                         'type': 'int',
                         'default': 3,
-                        'min': 2,
-                        'max': 10,
                         'step': 1,
                         'description': '聚类数量',
                         'detail': '将数据分为几个簇。建议根据数据特征选择：先尝试2-5个，观察效果后调整。聚类数过多可能导致过拟合。'
@@ -193,8 +191,6 @@ class KMeansDetection:
                     'contamination': {
                         'type': 'float',
                         'default': 0.1,
-                        'min': 0.01,
-                        'max': 0.5,
                         'step': 0.01,
                         'description': '异常数据比例',
                         'detail': '预期的异常点占总数据的比例。距离簇中心最远的contamination比例的点被标记为异常。'
@@ -202,8 +198,6 @@ class KMeansDetection:
                     'max_iter': {
                         'type': 'int',
                         'default': 100,
-                        'min': 10,
-                        'max': 500,
                         'step': 10,
                         'description': '最大迭代次数',
                         'detail': 'K-Means算法的最大迭代次数。通常100次足够收敛，数据量大时可适当增加。'

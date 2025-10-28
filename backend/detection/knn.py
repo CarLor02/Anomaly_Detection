@@ -143,8 +143,6 @@ class KNNDetection:
                     'n_neighbors': {
                         'type': 'int',
                         'default': 5,
-                        'min': 1,
-                        'max': 50,
                         'step': 1,
                         'description': 'K近邻数量',
                         'detail': '用于计算距离的邻居数量。值越大算法越稳定但计算量越大。小数据集建议5-10，大数据集建议20-50。'
@@ -152,8 +150,6 @@ class KNNDetection:
                     'contamination': {
                         'type': 'float',
                         'default': 0.1,
-                        'min': 0.01,
-                        'max': 0.5,
                         'step': 0.01,
                         'description': '异常数据比例',
                         'detail': '预期的异常点占总数据的比例。0.1表示预期10%的数据是异常。该值决定异常判定的阈值。'

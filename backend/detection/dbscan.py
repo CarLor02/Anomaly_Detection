@@ -157,8 +157,6 @@ class DBSCANDetection:
                     'eps': {
                         'type': 'float',
                         'default': 0.5,
-                        'min': 0.1,
-                        'max': 5.0,
                         'step': 0.1,
                         'description': '邻域半径',
                         'detail': '定义点的邻域范围（以标准差为单位）。较小的eps会产生更多的噪声点（异常），较大的eps会将更多点聚为一类。建议从0.5开始，根据数据分布调整。'
@@ -166,8 +164,6 @@ class DBSCANDetection:
                     'min_samples': {
                         'type': 'int',
                         'default': 5,
-                        'min': 2,
-                        'max': 20,
                         'step': 1,
                         'description': '最小样本数',
                         'detail': '成为核心点所需的最小邻居数（包括自己）。较大的值会产生更多噪声点（异常），较小的值会形成更密集的聚类。建议设置为数据集大小的1-2%。'

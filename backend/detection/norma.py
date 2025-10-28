@@ -150,8 +150,6 @@ class NormADetection:
                     'window_size': {
                         'type': 'int',
                         'default': 10,
-                        'min': 3,
-                        'max': 100,
                         'step': 1,
                         'description': '窗口大小',
                         'detail': '用于计算局部统计量的窗口大小。较小的窗口对局部异常更敏感，较大的窗口考虑更广的上下文。建议根据数据的局部变化特征选择。'
@@ -159,8 +157,6 @@ class NormADetection:
                     'contamination': {
                         'type': 'float',
                         'default': 0.1,
-                        'min': 0.01,
-                        'max': 0.5,
                         'step': 0.01,
                         'description': '异常数据比例',
                         'detail': '预期的异常数据占总数据的比例。归一化距离最大的contamination比例的点被标记为异常。'
@@ -168,8 +164,6 @@ class NormADetection:
                     'sensitivity': {
                         'type': 'float',
                         'default': 1.0,
-                        'min': 0.1,
-                        'max': 3.0,
                         'step': 0.1,
                         'description': '敏感度',
                         'detail': '控制异常检测的敏感程度。大于1会增加敏感度（检测出更多异常），小于1会降低敏感度（更保守）。建议从1.0开始调整。'

@@ -105,8 +105,6 @@ class ThreeSigmaDetection:
                     'sigma_threshold': {
                         'type': 'float',
                         'default': 3.0,
-                        'min': 1.0,
-                        'max': 5.0,
                         'step': 0.1,
                         'description': 'Sigma 阈值（倍数）',
                         'detail': '设置偏离均值的标准差倍数。3σ对应99.7%置信度，2σ对应95.4%，值越大检测越保守。'

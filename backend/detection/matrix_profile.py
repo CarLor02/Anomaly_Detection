@@ -145,8 +145,6 @@ class MatrixProfileDetection:
                     'window_size': {
                         'type': 'int',
                         'default': 10,
-                        'min': 3,
-                        'max': 100,
                         'step': 1,
                         'description': '窗口大小',
                         'detail': '子序列的长度。应该选择能够捕获异常模式特征的长度。窗口太小可能无法捕获完整模式，太大会降低灵敏度。建议从数据周期性的1/4到1/2开始尝试。'
@@ -154,8 +152,6 @@ class MatrixProfileDetection:
                     'contamination': {
                         'type': 'float',
                         'default': 0.1,
-                        'min': 0.01,
-                        'max': 0.5,
                         'step': 0.01,
                         'description': '异常数据比例',
                         'detail': '预期的异常数据占总数据的比例。Matrix Profile距离最大的contamination比例的子序列被标记为异常。'

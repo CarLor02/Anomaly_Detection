@@ -113,8 +113,6 @@ class IQRDetection:
                     'iqr_multiplier': {
                         'type': 'float',
                         'default': 1.5,
-                        'min': 0.5,
-                        'max': 5.0,
                         'step': 0.1,
                         'description': 'IQR 倍数',
                         'detail': 'IQR的倍数系数。1.5为标准值（识别离群值），3.0识别极端离群值。值越大检测越保守。'

@@ -179,8 +179,6 @@ class DataSmoothing:
                     'window_size': {
                         'type': 'int',
                         'default': 5,
-                        'min': 1,
-                        'max': 100,
                         'description': '窗口大小',
                         'detail': '平滑窗口的数据点数量。值越大平滑效果越强，但会损失更多细节。建议：噪声大用7-15，噪声小用3-7。指数平滑中，窗口大小影响衰减速度（alpha=2/(window+1））。'
                     }
